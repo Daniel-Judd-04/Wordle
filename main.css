@@ -1,0 +1,291 @@
+:root {
+	--bgCol: #121213;
+	--bgSecCol: #000;
+	--textCol: #d7dadc;
+	--hoverCol: #444446;
+	--borderCol: #545456;
+	--rowHeight: 100px;
+	--height: 63px;
+}
+
+* {
+	font-family: 'Montserrat', sans-serif;
+	position: relative;
+	z-index: 0;
+	cursor: default;
+	user-select: none;
+	-webkit-user-select: none;
+	transition: all 0.2s ease-in-out;
+}
+
+body {
+	background-color: var(--bgCol);
+	margin: 0;
+	transition: all 0.7s ease-out;
+}
+
+.game-container {
+	transition: all 0.8s ease-out;
+}
+
+.header-container {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+.header {
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 40px;
+	border-bottom: 2px solid var(--borderCol);
+}
+
+.header > h1 {
+	margin: 20px 0;
+	color: #538d4e;
+	font-size: 50px;
+	font-weight: 900;
+	letter-spacing: 3px;
+}
+
+.btn {
+	background-color: var(--bgCol);
+	width: 40px;
+	height: 40px;
+	border: 2px solid var(--borderCol);
+	color: var(--textCol);
+	font-weight: 600;
+	font-size: 25px;
+	line-height: 20px;
+	cursor: pointer;
+	margin: 10px 0;
+	transition: all 0.3s ease-in-out;
+}
+
+.btn:hover {
+	background-color: var(--hoverCol);
+}
+
+.material-icons {
+	color: var(--textCol);
+	cursor: pointer;
+}
+
+.menu-container {
+	transform: translate(0px, -100px);
+	width: 100vw;
+	height: 100vh;
+	display: none;
+	opacity: 0;
+	align-items: flex-start;
+	justify-content: center;
+	position: fixed;
+	z-index: 2;
+	pointer-events: none;
+	transition: opacity 0.2s ease-in-out;
+}
+
+.menu {
+	width: 400px;
+	margin-top: 275px;
+	background: #121213;
+	border: 2px solid var(--borderCol);
+	pointer-events: all;
+	cursor: default;
+	padding: 15px;
+	flex-direction: column;
+	gap: 50px;
+	background: var(--bgCol);
+	display: flex;
+}
+
+.menu.settings {
+	height: 270px;
+	transition: height .25s ease-in-out;
+}
+
+.title-container {
+	gap: 55px;
+}
+
+.title {
+	font-size: 30px;
+	min-width: 300px;
+	color: #538d4e;
+	font-weight: 800;
+	letter-spacing: 3px;
+	text-align: left;
+	height: 40px;
+}
+
+.menu > div > button {
+	margin: 0;
+}
+
+.menu > div {
+	color: var(--textCol);
+	font-weight: 600;
+	font-size: large;
+	display: flex;
+}
+
+.menu > div > div {
+	width: 250px;
+}
+
+span {
+	color: #538d4e;
+	font-weight: 700;
+	white-space: pre;
+	font-weight: bold;
+}
+
+.customBox {
+	opacity: 0;
+	display: flex;
+	transition: opacity .2s ease-in-out;
+}
+
+.text-input {
+	color: var(--textCol);
+	width: 142px;
+	height: 20px;
+	font-size: 15px;
+	cursor: pointer;
+	border: 2px solid var(--borderCol);
+	background-color: #538d4e;
+	text-align: center;
+	font-weight: 700;
+	transition: all 0.2s ease-in-out;
+}
+
+.text-input:hover {
+	background-color: #3d6739;
+}
+
+.text-input:focus {
+	background-color: #3d6739;
+}
+
+select {
+	-webkit-appearance: none;
+	cursor: pointer;
+	color: var(--textCol);
+	background-color: #538d4e;
+	border: 2px solid var(--borderCol);
+	width: 150px;
+	height: 25px;
+	text-align: -webkit-center;
+	font-size: 15px;
+	font-weight: 700;
+	transition: all 0.2s ease-in-out;
+	line-height: 20px;
+}
+
+select:hover {
+	background: #3d6739;
+}
+
+.message {
+	color: var(--textCol);
+	font-size: 30px;
+	text-align: center;
+	animation: grow 0.5s ease-in-out 0.5s 1 alternate both;
+	margin: 15px 0 20px 0;
+	font-weight: 800;
+	height: 40px;
+}
+
+@keyframes grow {
+	0% {
+		font-size: 30px;
+	}
+
+	50% {
+		font-size: 40px;
+	}
+
+	100% {
+		font-size: 30px;
+	}
+}
+
+.box {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 40px;
+}
+
+.row {
+	display: flex;
+	align-items: center;
+	height: var(--rowHeight);
+}
+
+.letter {
+	outline: none;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	flex: 1;
+	color: var(--textCol);
+	background-color: var(--bgCol);
+	border: 2px solid var(--borderCol);
+
+	text-align: center;
+	font-weight: 700;
+	line-height: 60px;
+	transition: all 0.0s ease-in 0.2s;
+}
+
+@keyframes reveal {
+	0% {
+		height: var(--height);
+	}
+
+	50% {
+		height: 0;
+	}
+
+	100% {
+		height: var(--height);
+	}
+}
+
+.keyRows {
+	display: flex;
+	justify-content: center;
+}
+
+.keys {
+	outline: none;
+	color: var(--textCol);
+	background-color: var(--bgCol);
+	border: 2px solid var(--borderCol);
+	height: 45px;
+	width: 40px;
+	margin: 1px 1px;
+	font-size: 20px;
+	text-align: center;
+	line-height: 45px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: all 0.4s ease-out;
+}
+
+.keys:hover {
+	transition: all 0.1s ease-out;
+	background-color: var(--hoverCol);
+	transform: translate(0px, -2px);
+}
+
+.keys:active {
+	transition: all 0.1s ease-out;
+	background-color: var(--hoverCol);
+	transform: translate(0px, 2px);
+}

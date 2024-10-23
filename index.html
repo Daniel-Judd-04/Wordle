@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport">
+    <link rel="stylesheet" href="main.css">
+    <title>Juddle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="game">
+        <div class="menu-container">
+            <div class="menu help" id="help-menu">
+                <div class="title-container">
+                    <div class="title">HOW TO PLAY</div>
+                    <button id="exit" class="btn" title="Close" onclick="hideMenu(document.getElementById('help-menu'))"><i class="material-icons">close</i></button>
+                </div>
+                <div>Guess the WORDLE in<span> 6 tries</span>.</div>
+                <div>Each guess must be a valid 5 letter word. Hit the enter button to submit.</div>
+                <div>After each guess, the color of the tiles will change to show how close your guess was to the word.</div>
+                <div>A new WORDLE will be available<span> each day</span>!</div>
+            </div>
+        </div>
+        <div class="menu-container">
+            <div class="menu settings" id="settings-menu">
+                <div class="title-container">
+                    <div class="title">SETTINGS</div>
+                    <button id="close" class="btn" title="Close" onclick="hideMenu(document.getElementById('settings-menu'))"><i class="material-icons">close</i></button>
+                </div>
+                <div>
+                    <div>Colour:</div>
+                    <select id="colour" title="Colour" onchange="updateColour()">
+                        <option value="0">Dark</option>
+                        <option value="1">Light</option>
+                        <option value="2">Contrast</option>
+                    </select>
+                </div>
+                <div>
+                    <div>Difficulty:</div>
+                    <select id="difficulty" title="Difficulty" onchange="updateDiff(null)">
+                        <option value="1.5">Easy</option>
+                        <option value="1">Medium</option>
+                        <option value="0.75">Hard</option>
+                    </select>
+                </div>
+                <div>
+                    <div>Game Mode:</div>
+                    <select id="gameMode" title="Game Mode" onchange="updateMode(this)">
+                        <option value="original">Original</option>
+                        <option value="practise">Practise</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div id="customBox" class="customBox">
+                    <div>Custom Word:</div>
+                    <input type="text" id="customWord" class="text-input" title="Custom Word" maxlength="12" onfocusout="updateWord(this)">
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-container" id="game-container">
+            <div class="header-container">
+                <div class="header">
+                    <button id='help-button' class="btn" onclick="showMenu(document.getElementById('help-menu'))"><i class="material-icons">help_outline</i></button>
+                    <h1>JUDDLE</h1>
+                    <button id='settings-button' class="btn" onclick="showMenu(document.getElementById('settings-menu'))"><i class="material-icons">settings</i></button>
+                </div>
+            </div>
+    
+            <div id="message-container"><div id="message" class="message">Unknown</div></div>
+            <div class="box">
+                <div id="container" class="container"></div>
+            </div>
+            <div class="box">
+                <div id="keyboard" class="keyboard"></div>
+            </div>
+        </div>
+    </div>
+    <script src="words.js"></script>
+    <script src="validWords.js"></script>
+    <script>
+        showMenu = (menu) => {
+            menu.parentElement.style.display = 'flex'
+            setTimeout(() => menu.parentElement.style.opacity = 1, 200);
+            document.getElementById('help-button').onclick = null;
+            document.getElementById('settings-button').onclick = null;
+            document.body.style.backgroundColor = 'var(--bgSecCol)';
+            document.getElementById('game-container').style.filter = 'blur(6px)';
+        }
+      
+        hideMenu = (menu) => {
+            menu.parentElement.style.opacity = 0;
+            setTimeout(() => menu.parentElement.style.display = 'none', 200);
+            document.getElementById('help-button').onclick = () => showMenu(document.getElementById('help-menu'));
+            document.getElementById('settings-button').onclick = () => showMenu(document.getElementById('settings-menu'));
+            document.body.style.backgroundColor = 'var(--bgCol)';
+            document.getElementById('game-container').style.filter = 'blur()';
+        }
+
+        keyboardAction = (inp) => {
+            if (currentRow  != ('row' + (guesses))) {
+                let allowedKeys = ['Backspace', 'Enter'];
+                
+                if ((!(typeof inp == 'string'))&&(!(allowedKeys.includes(inp['code'])))&&(!(inp['code'].includes('Key')))) return;
+                
+                let keyPressedCode;
+                let letter;
+                if (typeof inp === 'object') keyPressedCode = (inp || window.event).keyCode;
+                else if (inp == '⌫') keyPressedCode = 8;
+                else if (inp == '⏎') keyPressedCode = 13;
+                else keyPressedCode = inp.charCodeAt(0);
+                letter = String.fromCharCode(keyPressedCode).toUpperCase();
+                let field = document.getElementById(currentRow).firstElementChild;
+                for (let l = 0; l < 30; l++) if (field.textContent == '') break; else if (field.id == 'let' + (word.length - 1)) continue; else field = field.nextElementSibling;
+                if (guessed == false) insertLetter(field, letter, keyPressedCode);
+            }
+        }
+
+        insertLetter = (field, letter, keyPressedCode) => {
+            userWord = [];
+
+            if (keyPressedCode == 8) {
+		if (field.id != 'let0') if (field.id == 'let' + (word.length - 1) && field.textContent != '') field.textContent = ''; else field.previousElementSibling.textContent = '';
+		else field.textContent = '';
+            } else if ((keyPressedCode == 13) && (field.id == 'let'  + (word.length - 1)) && (field.textContent != '') && (document.body.style.backgroundColor != '#000' || document.body.style.backgroundColor != '#FFF')) {
+                
+
+		letter = field.parentElement.firstChild;
+                for (let i = 0; i < word.length; i++) {
+                    userWord.push(letter.textContent);
+                    if (i != (word.length - 1)) letter = letter.nextElementSibling;
+                }
+
+	if (validWords.includes(userWord.join('').toLowerCase())) {
+		if (currentRow.length == 4) currentRow = 'row' + (parseInt(currentRow[3]) + 1); else currentRow = 'row1' + (parseInt(currentRow[4]) + 1)
+                
+		if (userWord.toString() == word.toString()) {
+                    document.getElementById('message').textContent = 'Well Done!';
+                    document.getElementById('message').style.webkitAnimationPlayState = 'running';
+                    guessed = true;
+                }else if (field.parentElement.id == 'row' + (guesses - 1)) {
+                    document.getElementById('message').innerHTML = 'The word was <span style="color:#538d4e">' + word.join('') + '</span>';
+                    document.getElementById('message').style.webkitAnimationPlayState = 'running';
+                } else {
+                    userWord = [];
+                    document.getElementById('message').textContent = 'Guess Again!';
+                }
+
+		letter = field.parentElement.firstChild;
+                for (let i = 0; i < word.length; i++) {
+                    setTimeout(() => {
+                        letter.style.animation = 'reveal 0.5s linear 0s 1 alternate both',
+                        keyBoardLetter = document.getElementById(letter.textContent);
+                        if (letter.textContent == word[i]) {
+                            letter.style.backgroundColor = '#538d4e';
+                            letter.style.border = '2px solid #538d4e';
+                            keyBoardLetter.style.backgroundColor = '#538d4e';
+                            keyBoardLetter.style.border = '2px solid #538d4e';
+                        } else if (word.includes(letter.textContent)) {
+                            letter.style.backgroundColor = '#b49f3b';
+                            letter.style.border = '2px solid #b49f3b';
+                            keyBoardLetter.style.backgroundColor = '#b49f3b';
+                            keyBoardLetter.style.border = '2px solid #b49f3b';
+                        } else {
+                            letter.style.backgroundColor = 'var(--hoverCol)';
+                            letter.style.border = '2px solid var(--hoverCol)';
+                            keyBoardLetter.style.backgroundColor = 'var(--hoverCol)';
+                            keyBoardLetter.style.border = '2px solid var(--hoverCol)';
+                        }
+                        if (i != (word.length - 1)) letter = letter.nextElementSibling;
+                    }, 75 * i);
+                }
+	} else {
+			document.getElementById('message').textContent = 'Invalid word!';
+		}
+            } else if (/[A-Z]/.test(letter) && field.textContent == '') field.textContent = letter;
+        }
+
+        updateColour = () => {
+            colourKey = document.getElementById('colour').value;
+            let root = document.querySelector(':root');
+            root.style.setProperty('--bgCol', colourList[0][colourKey]);
+            root.style.setProperty('--bgSecCol', colourList[1][colourKey]);
+            root.style.setProperty('--textCol', colourList[2][colourKey]);
+            root.style.setProperty('--hoverCol', colourList[3][colourKey]);
+            root.style.setProperty('--borderCol', colourList[4][colourKey]);
+        }
+
+        updateMode = (mode) => {
+            if (mode.value == 'custom') {
+                document.getElementById('customBox').style.display = 'flex';
+                setTimeout(() => document.getElementById('customBox').style.opacity = 1, 200);
+                document.getElementById('settings-menu').style.height = '350px';
+            } else {
+                setTimeout(() => document.getElementById('customBox').style.display = 'none', 500);
+                document.getElementById('customBox').style.opacity = 0;
+                setTimeout(() => document.getElementById('settings-menu').style.height = '270px', 250);
+                updateWord(mode);
+            }
+        }
+
+        updateWord = (mode) => {
+            if (mode.value == 'practise' || (mode.value == 'original') || (mode == 'pass')) {
+                word = words[Math.floor(Math.random() * words.length)].toUpperCase().split('');
+                console.log(word)
+            } else if (mode.id == 'customWord') {
+                if (mode.value == '') {
+                    document.getElementById('gameMode').selectedIndex = 0;
+                    updateMode('pass');
+                } else word = mode.value.toUpperCase().split('');
+            }
+            updateDiff()
+        }
+
+        updateDiff = () => {
+            minGuessLength = Math.floor(5 * document.getElementById('difficulty').value);
+            maxGuessLength = Math.floor(8 * document.getElementById('difficulty').value);
+            guesses = Math.floor((word.length + 1) * document.getElementById('difficulty').value);
+            document.querySelector(':root').style.setProperty('--rowHeight', (Math.round((400 - (guesses * 4)) / guesses) + 12) + 'px');
+            if (guesses < minGuessLength) guesses = minGuessLength; else if (guesses > maxGuessLength) guesses = maxGuessLength;
+            updateGrid();
+        }
+
+        updateGrid = () => {
+            message = document.getElementById('message');
+
+            document.getElementById('message-container').removeChild(message);
+            document.getElementById('message-container').appendChild(message);
+            message.innerHTML = 'Guess a Word!';
+
+            message.style.animation = 'grow 0.5s ease-in-out 0.5s 1 alternate both';
+            message.style.webkitAnimationPlayState = 'paused';
+            
+            const alphabet = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', '⏎', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
+            currentRow = 'row0';
+            guessed = false;
+
+            let cellHeight = Math.round((400 - (guesses * 4)) / guesses) + 'px';
+            let cellWidth = cellHeight;
+            let cellFontSize = ((Math.round((400-(guesses * 4)) / guesses))*(2/3)) + 'px';
+            let cellBorderRadius = 'calc(' + Math.round(60 / guesses) + 'px' +  '* var(--radius))';
+            let cellMargin = Math.round(12 / guesses) + 'px';
+            document.querySelector(':root').style.setProperty('--rowHeight', (Math.round((400 - (guesses * 4)) / guesses) + 8) + 'px');
+
+            let targetElement = document.getElementById('container');
+            targetElement.innerHTML = '';
+            for (let i = 0; i < guesses; i++) {
+                let element = document.createElement('div');
+                element.className = 'row';
+                element.id = 'row' + i;
+                for (let p = 0; p < word.length; p++) {
+                    let e1 = document.createElement('div');
+                    e1.className = 'letter';
+                    e1.id = 'let' + p;
+                    e1.style.fontSize = cellFontSize;
+                    e1.style.width = cellWidth;
+                    e1.style.height = cellHeight;
+                    e1.style.lineHeight = cellHeight;
+                    e1.style.borderRadius = cellBorderRadius;
+                    e1.style.margin = cellMargin;
+                    e1.contentEditable = false;
+                    element.appendChild(e1);
+                }
+                targetElement.appendChild(element);
+            }
+            
+            targetElement = document.getElementById('keyboard');
+            targetElement.innerHTML = '';
+            numKeys = [10, 9, 9];
+            for (let i = 0; i < 3; i++) {
+                let row = document.createElement('div');
+                row.className = 'keyRows';
+                row.id = 'keyRow' + i;
+                for (let j = 0; j < numKeys[i]; j++) {
+                    let element = document.createElement('div');
+                    element.textContent = alphabet[numKeys.slice(0, i).reduce((partialSum, a) => partialSum + a, 0) + j];
+                    element.className = 'keys';
+                    element.id = alphabet[numKeys.slice(0, i).reduce((partialSum, a) => partialSum + a, 0) + j];
+                    element.onclick = () => keyboardAction(element.id);
+                    if ((element.id == '⏎') || (element.id == '⌫')) element.style.width = '65px';
+                    row.appendChild(element);
+                }
+                targetElement.appendChild(row);
+            }
+        }
+        
+        let guesses, currentRow, guessed, maxGuessLength, minGuessLength;
+        let word = [];
+        let userWord = [];
+        let menuShowing = false;
+
+        // var fs = require("fs");
+        //
+        // console.log("Going to write into existing file");
+        //
+        // fs.readFile('settings.txt', function (err, data) {
+        //     if (err) {
+        //         return console.error(err);
+        //     }
+        //     console.log("Asynchronous read: " + data.toString());
+        // });
+
+        document.getElementById('colour').selectedIndex = 0;
+        document.getElementById('difficulty').selectedIndex = 1;
+        document.getElementById('gameMode').selectedIndex = 1;
+        //add stored custom word
+
+        let colourKey = document.getElementById('colour').value;
+        const colourList = [['#121213', '#FFF', '#000'], ['#000', '#d7dadc', '#000'], ['#d7dadc', '#121213', '#FFFF00'], ['#2e2e2e', '#d1d1d1', '#000'], ['#545456', '#a2a2a2', '#FFFF00']]; // BG, SecBG, Text, hover, border // DARK / LIGHT
+        updateColour();
+        updateWord('pass');
+
+        document.onkeydown = (e) => keyboardAction(e);
+    </script>
+</body>
+</html>
